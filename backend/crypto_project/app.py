@@ -18,6 +18,11 @@ for entry in rental_data:
         available_filters[key].add(value)
 
 
+@app.route('/')
+def hello_world():
+    return 'Hello, World!'
+
+
 @app.route('/api/filter-options')
 def filter_options():
     category = request.args.get('category', 'BHK')
@@ -40,4 +45,4 @@ def rental_data_api():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

@@ -17,30 +17,39 @@ You need to have the following installed on your system:
 
 - Node.js and npm (https://nodejs.org/)
 - Python 3 (https://www.python.org/downloads/)
+- Docker (https://www.docker.com/)
 - Git (optional, if you plan to clone the repository)
 
 ### Setting Up the Environment
 
-#### Back End Setup
+#### Docker Setup
 
 1. Clone the repository or download the source code.
-2. Navigate to the Flask project directory:
+2. From the project root directory, build and run the Docker containers:
+   ```bash
+   docker-compose up --build
+   ```
+   This command will set up both the front end and the back end services.
+
+#### Back End Setup
+
+1. Navigate to the Flask project directory:
    ```bash
    cd backend/crypto_project
    ```
-3. Create a virtual environment and activate it:
+2. Create a virtual environment and activate it (optional if running outside Docker):
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   source venv/bin/activate  # On Windows use `venv\Scriptsctivate`
    ```
-4. Install the required Python packages:
+3. Install the required Python packages:
    ```bash
    pip install flask flask-cors
    ```
 
 #### Front End Setup
 
-1. Navigate to the React project directory:
+1. Navigate to the React project directory (optional if running inside Docker):
    ```bash
    cd rental-query-app
    ```
@@ -51,21 +60,10 @@ You need to have the following installed on your system:
 
 ### Running the Application
 
-#### Running the Back End
+The application should be accessible via:
 
-1. Within the `backend/crypto_project` directory, start the Flask application:
-   ```bash
-   python app.py
-   ```
-   This will serve the API on `http://localhost:5000`.
-
-#### Running the Front End
-
-1. In a new terminal, navigate to the `rental-query-app` directory and start the React application:
-   ```bash
-   npm start
-   ```
-   This will run the front end on `http://localhost:3000` and should automatically open in your default web browser.
+- **Front End**: `http://localhost:3000`
+- **Back End**: `http://localhost:5000`
 
 ## Usage
 
@@ -76,11 +74,3 @@ You need to have the following installed on your system:
 ## Contributing
 
 Feel free to fork the repository, make changes, and submit pull requests. Any contributions you make are **greatly appreciated**.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to all the contributors who have invested their time into improving this project.

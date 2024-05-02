@@ -32,10 +32,11 @@ const RentalQuery = () => {
         rows,
         prepareRow,
     } = useTable({ columns, data });
+    console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
 
     useEffect(() => {
         // Fetch filter options based on selected filter category
-        axios.get(`http://localhost:5000/api/filter-options?category=${filter}`)
+        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/filter-options?category=${filter}`)
             .then(response => {
                 setFilterOptions(response.data.options);
                 setSelectedOption(response.data.options[0]);
@@ -44,7 +45,7 @@ const RentalQuery = () => {
     }, [filter]);
 
     const fetchFilteredData = () => {
-        axios.get(`http://localhost:5000/api/rental-data?filter=${filter}&value=${selectedOption}`)
+        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/rental-data?filter=${filter}&value=${selectedOption}`)
             .then(response => {
                 setData(response.data);
             })
