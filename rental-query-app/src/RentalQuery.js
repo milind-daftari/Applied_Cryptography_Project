@@ -1,108 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useTable } from 'react-table';
 
 const RentalQuery = () => {
-    const [filter, setFilter] = useState('BHK');
-    const [filterOptions, setFilterOptions] = useState([]);
-    const [selectedOption, setSelectedOption] = useState('');
-    const [data, setData] = useState([]);
+    const [bhk, setBHK] = useState('');
+    const [city, setCity] = useState('');
+    const [furnishingStatus, setFurnishingStatus] = useState('');
+    const [bathroom, setBathroom] = useState('');
+    const [averageRent, setAverageRent] = useState('');
 
-    const columns = React.useMemo(
-        () => [
-            { Header: 'BHK', accessor: 'BHK' },
-            { Header: 'Rent', accessor: 'Rent' },
-            { Header: 'Size', accessor: 'Size' },
-            { Header: 'Floor', accessor: 'Floor' },
-            { Header: 'Area Type', accessor: 'AreaType' },
-            { Header: 'Area Locality', accessor: 'AreaLocality' },
-            { Header: 'City', accessor: 'City' },
-            { Header: 'Furnishing Status', accessor: 'FurnishingStatus' },
-            { Header: 'Tenant Preferred', accessor: 'TenantPreferred' },
-            { Header: 'Bathroom', accessor: 'Bathroom' },
-            { Header: 'Point of Contact', accessor: 'PointOfContact' }
-        ],
-        []
-    );
+    const handleFetchData = () => {
+        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/filter-options`, {
+            params: { bhk, city, furnishingStatus, bathroom }
+        })
+        .then(response => {
+            setAverageRent(response.data.averageRent);
+        })
+        .catch(error => {
+            console.error('Error fetching data: ', error);
+        });
+    };
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = useTable({ columns, data });
-    console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
+    const containerStyle = {
+        padding: '20px',
+        fontFamily: 'Arial, sans-serif'
+    };
 
-    useEffect(() => {
-        // Fetch filter options based on selected filter category
-        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/filter-options?category=${filter}`)
-            .then(response => {
-                setFilterOptions(response.data.options);
-                setSelectedOption(response.data.options[0]);
-            })
-            .catch(error => console.error('Error fetching filter options: ', error));
-    }, [filter]);
+    const filterContainerStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: '20px'
+    };
 
-    const fetchFilteredData = () => {
-        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/rental-data?filter=${filter}&value=${selectedOption}`)
-            .then(response => {
-                setData(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching data: ', error);
-            });
+    const selectStyle = {
+        marginBottom: '10px',
+        padding: '10px',
+        width: '200px'
+    };
+
+    const buttonStyle = {
+        padding: '10px 20px',
+        backgroundColor: '#007BFF',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        width: '220px'  // Slightly wider to account for padding in selects
+    };
+
+    const resultStyle = {
+        marginTop: '20px',
+        fontWeight: 'bold',
+        fontSize: '24px',
+        color: '#333'
     };
 
     return (
-        <div className="rental-query-container">
+        <div style={containerStyle}>
             <h1>Rental Price Query System</h1>
-            <div className="filter-section">
-                <select value={filter} onChange={e => setFilter(e.target.value)}>
-                    <option value="BHK">BHK</option>
-                    <option value="Rent">Rent</option>
-                    <option value="Size">Size</option>
-                    <option value="Floor">Floor</option>
-                    <option value="Area Type">Area Type</option>
-                    <option value="Area Locality">Area Locality</option>
-                    <option value="City">City</option>
-                    <option value="Furnishing Status">Furnishing Status</option>
-                    <option value="Tenant Preferred">Tenant Preferred</option>
-                    <option value="Bathroom">Bathroom</option>
-                    <option value="Point of Contact">Point of Contact</option>
+            <div style={filterContainerStyle}>
+                <select style={selectStyle} value={bhk} onChange={e => setBHK(e.target.value)}>
+                    <option value="">Select BHK</option>
+                    {[1,2,3,4,5,6].map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
-                <select value={selectedOption} onChange={e => setSelectedOption(e.target.value)}>
-                    {filterOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                    ))}
+                <select style={selectStyle} value={city} onChange={e => setCity(e.target.value)}>
+                    <option value="">Select City</option>
+                    {["Bangalore", "Kolkata", "Chennai", "Delhi", "Hyderabad", "Mumbai"].map(city => <option key={city} value={city}>{city}</option>)}
                 </select>
-                <button onClick={fetchFilteredData}>Fetch Data</button>
-            </div>
-            <div className="data-table">
-                <table {...getTableProps()}>
-                    <thead>
-                        {headerGroups.map(headerGroup => (
-                            <tr {...headerGroup.getHeaderGroupProps()}>
-                                {headerGroup.headers.map(column => (
-                                    <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody {...getTableBodyProps()}>
-                        {rows.map((row, i) => {
-                            prepareRow(row);
-                            return (
-                                <tr {...row.getRowProps()}>
-                                    {row.cells.map(cell => {
-                                        return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
-                                    })}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                <select style={selectStyle} value={furnishingStatus} onChange={e => setFurnishingStatus(e.target.value)}>
+                    <option value="">Select Furnishing Status</option>
+                    {["Unfurnished", "Semi-Furnished", "Furnished"].map(status => <option key={status} value={status}>{status}</option>)}
+                </select>
+                <select style={selectStyle} value={bathroom} onChange={e => setBathroom(e.target.value)}>
+                    <option value="">Select Bathroom</option>
+                    {[1,2,3,4,5,6,7,10].map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+                <button style={buttonStyle} onClick={handleFetchData}>Fetch Data</button>
+            
+            {averageRent && <div style={resultStyle}>Average Rent: {averageRent}</div>}
+        </div>
         </div>
     );
 };
