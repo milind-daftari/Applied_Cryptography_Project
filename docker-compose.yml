@@ -1,28 +1,45 @@
 version: '3.8'
+
 services:
   backend:
-    build: ./backend/crypto_project  # Path to where the Dockerfile is located
+    build: ./backend/crypto_project
     ports:
-      - "5000:5000"  # Expose port 5000 on the host and map to port 5000 in the container
+      - "5000:5000"
     volumes:
-      - ./backend/crypto_project:/app  # Mount the host directory for live code updates
+      - ./backend/crypto_project:/app
     environment:
       - FLASK_ENV=development
       - FLASK_APP=app.py
     networks:
-      - app-network  # Define and attach to a network for inter-service communication
+      - app-network
 
   frontend:
     build: ./rental-query-app
     ports:
-      - "3000:3000"  # Expose port 3000 on the host and map to port 3000 in the container
+      - "3000:3000"
     depends_on:
-      - backend  # Ensures backend is started first
+      - backend
     environment:
-      - REACT_APP_BACKEND_URL=http://localhost:5000  # Environment variable for backend URL
+      - REACT_APP_BACKEND_URL=http://localhost:5000
     networks:
-      - app-network  # Attach to the same network as backend
+      - app-network
+
+  db:
+    build: ./database
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist data between restarts
+    networks:
+      - app-network
 
 networks:
-  app-network:  # Define the network
+  app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
