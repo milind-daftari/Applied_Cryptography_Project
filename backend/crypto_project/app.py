@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from data_search_poc import *
+from openfhe import *
 
 app = Flask(__name__)
 CORS(app)
@@ -8,6 +10,8 @@ CORS(app)
 def FILTER_IT_NOW(bhk, city, furnishing_status, bathroom):
     # Dummy function to simulate filtering and calculating average rent
     # Replace this logic with your actual database query or calculation
+    setup()
+    encrypted_search(bhk)
     return 25000  # Dummy average rent value
 
 
