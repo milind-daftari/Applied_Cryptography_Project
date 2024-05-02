@@ -1,0 +1,26 @@
+Setup
+    [-] OpenFHE and python wrapper
+
+Data loader program
+    [-] Creater Data loader program to add plain data to DB
+    [-] Add function to add encrypted data to DB
+    [] Add function in data loader to add encrypted tables in 3 FHE schemes (CKKS, BGV, BVS)
+    [] Use common keys to encrypt the data rather then generating on the fly
+
+Data Search program
+    [] Create Data Search program to search the revelant data from DB
+    [] Calculate average Rent
+    [] Add function to search encrypted data to DB
+    [] Add function in data loader to add encrypted tables in 3 FHE schemes (CKKS, BGV, BVS)
+    [] Use common keys to encrypt the data rather then generating on the fly
+
+Query program
+    [] Query front end to select data parameters
+    [] Use common keys to encrypt data before sending to query program
+
+Integration
+    [] Integrate all programs to use common keys
+    [] Data search results to be embedded in query program
+
+Testing
+    [] Various alogirthms performance (Search Time, Extend Partial, Setup time)
