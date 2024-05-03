@@ -99,14 +99,15 @@ def find_match(negated_ciphertext, database):
         # Adding the negated ciphertext to each database entry
         result_ct = cryptoContext.EvalAdd(ct, negated_ciphertext)
         result_pt = cryptoContext.Decrypt(keypair.secretKey, result_ct)
-        print(result_pt)
+        strresult = str(result_pt)
+        value = int(strresult.split()[1])
+        # print(value)
         # Checking if the result decrypts to zero (indicating a match)
-        if np.all(np.array(result_pt) == 0):
+        if value == 0:
             original_pt = cryptoContext.Decrypt(keypair.secretKey, ct)
-            print("Match found with plaintext:", original_pt)
+            original_pt = str(original_pt).split()[1]
             return original_pt  # Returning the original plaintext of the matching ciphertext
-    print("No match found.")
-    return None
+    return "No match found"
 
 
 # Perform the encrypted search
@@ -120,7 +121,6 @@ def encrypted_search(value):
     else:
         print("No matching entry found.")
 
-
-setup()
+# setup()
 # input_value = int(input("Enter an integer to search: "))
-encrypted_search(value="bhk")
+# encrypted_search(input_value)
