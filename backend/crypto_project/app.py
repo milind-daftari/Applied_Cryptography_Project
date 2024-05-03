@@ -9,7 +9,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 setup()
 
 
-def FILTER_IT_NOW(bhk):
+def FILTER_IT_NOW(bhk, city, furnishing_status, bathroom):
     return encrypted_search(bhk)
 
 
@@ -21,7 +21,7 @@ def filter_options():
     furnishing_status = request.args.get('furnishingStatus')
     bathroom = request.args.get('bathroom')
     if bhk is not None:
-        average_rent = FILTER_IT_NOW(bhk)
+        average_rent = FILTER_IT_NOW(bhk, city, furnishing_status, bathroom)
         return jsonify(averageRent=average_rent)
     else:
         return jsonify(message="Invalid input"), 400
