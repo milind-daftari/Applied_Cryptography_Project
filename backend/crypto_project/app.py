@@ -13,7 +13,7 @@ global cryptoContext, keypair, datafolder, serType
 def setup():
     global cryptoContext, keypair, datafolder, serType
     datafolder = 'demoData'
-    serType = BINARY  # BINARY or JSON
+    serType = JSON  # BINARY or JSON
 
     # Ensure the data directory exists
     os.makedirs(datafolder, exist_ok=True)
@@ -55,19 +55,26 @@ def setup():
 
 def encrypt_and_store(values):
     global cryptoContext, keypair, datafolder, serType
+    fn = open(f"{datafolder}/database","wb")
     for idx, value in enumerate(values):
         plaintext = cryptoContext.MakePackedPlaintext([value])
         ciphertext = cryptoContext.Encrypt(keypair.publicKey, plaintext)
-        filename = f"{datafolder}/ciphertext{idx}.txt"
+        filename = f"{datafolder}/ciphertext.txt"
         SerializeToFile(filename, ciphertext, serType)
-    create_dbtxt(values)
+        with open(f"{datafolder}/ciphertext.txt","rb") as file:
+            cipherline = file.read()
+            fn.write(cipherline)
+            fn.write(b"ENDENDEND")
+        file.close()
+    fn.close()
+    #create_dbtxt(values)
 
-def create_dbtxt(values):
+'''def create_dbtxt(values):
     fn = f"{datafolder}/db.txt"
     with open(fn, 'w') as file:
         for idx in values:
             file.write(f"ciphertext{idx}.txt")
-            file.write("\n")
+            file.write("\n")'''
 
 def encrypt_input(value):
     plaintext = cryptoContext.MakePackedPlaintext([int(value)])
@@ -87,20 +94,47 @@ def find_match(negated_ciphertext, database):
             return int(str(original_pt).split()[1])
     return "No match found"
 
-def load_encrypted_database(filename):
+'''def load_encrypted_database(filename):
     encrypted_values = []
     with open(filename, 'r') as file:
-        for line in file:
-            path = f"{datafolder}/{line.strip()}"
-            ct, _ = DeserializeCiphertext(path, serType)
+        fn = open("ciphertext","wb")
+        # Read the entire file content at once
+        content = file.read()
+        # Split the content based on three consecutive newline characters
+        entries = content.split('ENDENDEND')
+        print(len(entries))
+        for i in range(len(entries)):
+            fn.write(entries[i].encode())
+            ct, _ = DeserializeCiphertext("ciphertext.txt", serType)
             encrypted_values.append(ct)
-    return encrypted_values
+    return encrypted_values'''
 
 def encrypted_search(value):
     encrypted_input = encrypt_input(value)
     negated_input = negate_ciphertext(encrypted_input)
-    encrypted_database = load_encrypted_database(f"{datafolder}/db.txt")
-    return find_match(negated_input, encrypted_database)
+    
+    encrypted_values = []
+    with open(f"{datafolder}/database", 'r') as file:
+        content = file.read()
+        entries = content.split('ENDENDEND')
+        print("Number of entries:", len(entries))
+        
+        # Ensure the temporary file is opened only once
+        with open(f"{datafolder}/temporary.txt", "wb") as fn:
+            for entry in entries:
+                if entry.strip():  # Check if the entry is not empty
+                    # Write each entry to the file and read it back for deserialization
+                    fn.seek(0)  # Reset file pointer to the start of the file
+                    fn.truncate()  # Clear existing content
+                    fn.write(entry.strip().encode())
+                    fn.flush()  # Ensure data is written to disk
+
+                    ct, _ = DeserializeCiphertext(f"{datafolder}/temporary.txt", serType)
+                    encrypted_values.append(ct)
+
+    print("Encrypted values:", encrypted_values)
+    return find_match(negated_input, encrypted_values)
+
 
 @app.route('/api/filter-options', methods=['GET'])
 def filter_options():
