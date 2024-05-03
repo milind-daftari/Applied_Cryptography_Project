@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  db:
+    build: ./database
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   backend:
     build: ./backend/crypto_project
     ports:
@@ -10,6 +28,9 @@ services:
     environment:
       - FLASK_ENV=development
       - FLASK_APP=app.py
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -21,19 +42,6 @@ services:
       - backend
     environment:
       - REACT_APP_BACKEND_URL=http://localhost:5000
-    networks:
-      - app-network
-
-  db:
-    build: ./database
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_USER=test
-      - POSTGRES_PASSWORD=test
-      - POSTGRES_DB=test_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist data between restarts
     networks:
       - app-network
 

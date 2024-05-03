@@ -5,6 +5,7 @@ import os
 # Define global variables
 global cryptoContext, keypair, datafolder, serType
 
+
 def setup():
     global cryptoContext, keypair, datafolder, serType
     datafolder = 'demoData'
@@ -13,7 +14,8 @@ def setup():
     if not os.path.exists(datafolder):
         os.makedirs(datafolder)
         print(f"Created directory `{datafolder}` for storing data.")
-    print("This program requires the subdirectory `" + datafolder + "' to exist, otherwise you will get an error writing serializations.")
+    print("This program requires the subdirectory `" + datafolder +
+          "' to exist, otherwise you will get an error writing serializations.")
 
     # Initialize Crypto Context and Key Generation
     parameters = CCParamsBFVRNS()
@@ -26,20 +28,26 @@ def setup():
     cryptoContext.Enable(PKESchemeFeature.LEVELEDSHE)
 
     if not SerializeToFile(datafolder + "/cryptocontext.txt", cryptoContext, serType):
-        raise Exception("Error writing serialization of the crypto context to cryptocontext.txt")
+        raise Exception(
+            "Error writing serialization of the crypto context to cryptocontext.txt")
     print("The cryptocontext has been serialized.")
 
     keypair = cryptoContext.KeyGen()
     SerializeToFile(datafolder + "/key-public.txt", keypair.publicKey, serType)
-    SerializeToFile(datafolder + "/key-private.txt", keypair.secretKey, serType)
+    SerializeToFile(datafolder + "/key-private.txt",
+                    keypair.secretKey, serType)
     cryptoContext.EvalMultKeyGen(keypair.secretKey)
-    cryptoContext.SerializeEvalMultKey(datafolder + "/key-eval-mult.txt", serType)
+    cryptoContext.SerializeEvalMultKey(
+        datafolder + "/key-eval-mult.txt", serType)
     cryptoContext.EvalRotateKeyGen(keypair.secretKey, [1, 2, -1, -2])
-    cryptoContext.SerializeEvalAutomorphismKey(datafolder + "/key-eval-rot.txt", serType)
+    cryptoContext.SerializeEvalAutomorphismKey(
+        datafolder + "/key-eval-rot.txt", serType)
     print("Keys and evaluation keys have been serialized.")
-    encrypt_and_store([1,2,3,4,5,6,7,8])
+    encrypt_and_store([1, 2, 3, 4, 5, 6, 7, 8])
 
 # Encrypt integers and store in the database
+
+
 def encrypt_and_store(values):
     global cryptoContext, keypair, datafolder, serType
     for idx, value in enumerate(values):
@@ -53,6 +61,8 @@ def encrypt_and_store(values):
             f.write(f"ciphertext{idx}.txt\n")
 
 # Load encrypted database
+
+
 def load_encrypted_database(filename):
     with open(filename, 'r') as file:
         encrypted_values = []
@@ -67,11 +77,14 @@ def load_encrypted_database(filename):
         return encrypted_values
 
 # Encrypt input and negate ciphertext
+
+
 def encrypt_input(value):
     plaintext = cryptoContext.MakePackedPlaintext([value])
     ciphertext = cryptoContext.Encrypt(keypair.publicKey, plaintext)
     print(f"Input {value} encrypted.")
     return ciphertext
+
 
 def negate_ciphertext(ciphertext):
     negated = cryptoContext.EvalNegate(ciphertext)
@@ -79,6 +92,8 @@ def negate_ciphertext(ciphertext):
     return negated
 
 # Search for the match
+
+
 def find_match(negated_ciphertext, database):
     for ct in database:
         # Adding the negated ciphertext to each database entry
@@ -105,6 +120,7 @@ def encrypted_search(value):
     else:
         print("No matching entry found.")
 
+
 setup()
-#input_value = int(input("Enter an integer to search: "))
-encrypted_search(input_value)
+# input_value = int(input("Enter an integer to search: "))
+encrypted_search(value="bhk")
