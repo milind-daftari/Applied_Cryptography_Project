@@ -17,6 +17,9 @@ def FILTER_IT_NOW(bhk):
 def filter_options():
     # Direct conversion and default handling
     bhk = request.args.get('bhk', type=int)
+    city = request.args.get('city')
+    furnishing_status = request.args.get('furnishingStatus')
+    bathroom = request.args.get('bathroom')
     if bhk is not None:
         average_rent = FILTER_IT_NOW(bhk)
         return jsonify(averageRent=average_rent)
