@@ -1,5 +1,4 @@
 from openfhe import *
-import numpy as np
 import os
 
 # Define global variables
@@ -11,11 +10,9 @@ def setup():
     datafolder = 'demoData'
     serType = BINARY  # BINARY or JSON
 
-    if not os.path.exists(datafolder):
-        os.makedirs(datafolder)
-        print(f"Created directory `{datafolder}` for storing data.")
-    print("This program requires the subdirectory `" + datafolder +
-          "' to exist, otherwise you will get an error writing serializations.")
+    # Ensure the data directory exists
+    os.makedirs(datafolder, exist_ok=True)
+    print(f"Created or verified directory `{datafolder}` for storing data.")
 
     # Initialize Crypto Context and Key Generation
     parameters = CCParamsBFVRNS()
@@ -33,19 +30,23 @@ def setup():
     print("The cryptocontext has been serialized.")
 
     keypair = cryptoContext.KeyGen()
+    if not keypair:
+        raise Exception("Key generation failed.")
+
     SerializeToFile(datafolder + "/key-public.txt", keypair.publicKey, serType)
     SerializeToFile(datafolder + "/key-private.txt",
                     keypair.secretKey, serType)
+
     cryptoContext.EvalMultKeyGen(keypair.secretKey)
     cryptoContext.SerializeEvalMultKey(
         datafolder + "/key-eval-mult.txt", serType)
     cryptoContext.EvalRotateKeyGen(keypair.secretKey, [1, 2, -1, -2])
     cryptoContext.SerializeEvalAutomorphismKey(
         datafolder + "/key-eval-rot.txt", serType)
-    print("Keys and evaluation keys have been serialized.")
-    encrypt_and_store([1, 2, 3, 4, 5, 6, 7, 8])
 
-# Encrypt integers and store in the database
+    print("Keys and evaluation keys have been serialized.")
+    # Encrypt and store values 1 through 8
+    encrypt_and_store(list(range(1, 9)))
 
 
 def encrypt_and_store(values):
@@ -56,31 +57,25 @@ def encrypt_and_store(values):
         filename = f"{datafolder}/ciphertext{idx}.txt"
         SerializeToFile(filename, ciphertext, serType)
         print(f"Ciphertext for {value} stored as {filename}")
-    with open(f"{datafolder}/db.txt", "w") as f:
-        for idx in range(len(values)):
-            f.write(f"ciphertext{idx}.txt\n")
-
-# Load encrypted database
 
 
-def load_encrypted_database(filename):
+def load_encrypted_database():
+    filename = f"{datafolder}/db.txt"
+    encrypted_values = []
     with open(filename, 'r') as file:
-        encrypted_values = []
         for line in file:
             path = f"{datafolder}/{line.strip()}"
-            ct, success = DeserializeCiphertext(path, serType)
+            ciphertext, success = DeserializeCiphertext(path, serType)
             if success:
-                encrypted_values.append(ct)
+                encrypted_values.append(ciphertext)
                 print(f"Loaded ciphertext from {path}")
             else:
                 print(f"Failed to load ciphertext from {path}")
-        return encrypted_values
-
-# Encrypt input and negate ciphertext
+    return encrypted_values
 
 
 def encrypt_input(value):
-    plaintext = cryptoContext.MakePackedPlaintext([int(value)])  # Convert value to int if not already
+    plaintext = cryptoContext.MakePackedPlaintext([value])
     ciphertext = cryptoContext.Encrypt(keypair.publicKey, plaintext)
     print(f"Input {value} encrypted.")
     return ciphertext
@@ -91,36 +86,29 @@ def negate_ciphertext(ciphertext):
     print("Ciphertext negated.")
     return negated
 
-# Search for the match
-
 
 def find_match(negated_ciphertext, database):
     for ct in database:
-        # Adding the negated ciphertext to each database entry
         result_ct = cryptoContext.EvalAdd(ct, negated_ciphertext)
         result_pt = cryptoContext.Decrypt(keypair.secretKey, result_ct)
-        strresult = str(result_pt)
-        value = int(strresult.split()[1])
-        # print(value)
-        # Checking if the result decrypts to zero (indicating a match)
+        result_str = str(result_pt)  # Convert Plaintext to string if possible
+        # Assuming the string conversion gives you the number at the start of the string
+        # Adjust index based on actual format
+        value = int(result_str.split()[0])
         if value == 0:
             original_pt = cryptoContext.Decrypt(keypair.secretKey, ct)
-            original_pt = str(original_pt).split()[1]
-            return int(original_pt)  # Returning the original plaintext of the matching ciphertext
+            original_value = int(str(original_pt).split()[0])
+            return original_value
     return "No match found"
 
 
-# Perform the encrypted search
 def encrypted_search(value):
     encrypted_input = encrypt_input(value)
     negated_input = negate_ciphertext(encrypted_input)
-    encrypted_database = load_encrypted_database(f"{datafolder}/db.txt")
+    encrypted_database = load_encrypted_database()
     match = find_match(negated_input, encrypted_database)
-    if match is not None:
+    if match != "No match found":
         print("Matching plaintext value:", match)
     else:
         print("No matching entry found.")
-
-# setup()
-# input_value = int(input("Enter an integer to search: "))
-# encrypted_search(input_value)
+    return match

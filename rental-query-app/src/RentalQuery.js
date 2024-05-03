@@ -3,21 +3,18 @@ import axios from 'axios';
 
 const RentalQuery = () => {
     const [bhk, setBHK] = useState('');
-    const [city, setCity] = useState('');
-    const [furnishingStatus, setFurnishingStatus] = useState('');
-    const [bathroom, setBathroom] = useState('');
     const [averageRent, setAverageRent] = useState('');
 
-    const handleFetchData = () => {
-        axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/filter-options`, {
-            params: { bhk, city, furnishingStatus, bathroom }
-        })
-        .then(response => {
+    const handleFetchData = async () => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/filter-options`, {
+                params: { bhk }
+            });
             setAverageRent(response.data.averageRent);
-        })
-        .catch(error => {
+        }
+        catch(error){
             console.error('Error fetching data: ', error);
-        });
+        }
     };
 
     const containerStyle = {
@@ -62,18 +59,6 @@ const RentalQuery = () => {
                 <select style={selectStyle} value={bhk} onChange={e => setBHK(e.target.value)}>
                     <option value="">Select BHK</option>
                     {[1,2,3,4,5,6].map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-                <select style={selectStyle} value={city} onChange={e => setCity(e.target.value)}>
-                    <option value="">Select City</option>
-                    {["Bangalore", "Kolkata", "Chennai", "Delhi", "Hyderabad", "Mumbai"].map(city => <option key={city} value={city}>{city}</option>)}
-                </select>
-                <select style={selectStyle} value={furnishingStatus} onChange={e => setFurnishingStatus(e.target.value)}>
-                    <option value="">Select Furnishing Status</option>
-                    {["Unfurnished", "Semi-Furnished", "Furnished"].map(status => <option key={status} value={status}>{status}</option>)}
-                </select>
-                <select style={selectStyle} value={bathroom} onChange={e => setBathroom(e.target.value)}>
-                    <option value="">Select Bathroom</option>
-                    {[1,2,3,4,5,6,7,10].map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
                 <button style={buttonStyle} onClick={handleFetchData}>Fetch Data</button>
             

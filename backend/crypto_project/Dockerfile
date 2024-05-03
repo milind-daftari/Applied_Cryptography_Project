@@ -5,7 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary dependencies for OpenFHE and JupyterLab
 RUN apt-get update && apt-get install -y \
-    apt-utils \    
+    apt-utils \
+    iputils-ping \    
     git \
     cmake \
     build-essential \
