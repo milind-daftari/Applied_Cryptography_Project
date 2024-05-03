@@ -12,8 +12,9 @@ def FILTER_IT_NOW(bhk, city, furnishing_status, bathroom):
     # Dummy function to simulate filtering and calculating average rent
     # This function initializes the FHE setup and performs an encrypted search
     setup()
-    encrypted_search(bhk)
-    return 25000  # Return a dummy average rent value
+    return encrypted_search(bhk)
+
+    #return 25000  # Return a dummy average rent value
 
 
 @app.route('/api/filter-options', methods=['GET'])
@@ -23,6 +24,9 @@ def filter_options():
     city = request.args.get('city')
     furnishing_status = request.args.get('furnishingStatus')
     bathroom = request.args.get('bathroom')
+
+    if bhk:
+        bhk = int(bhk)  # Ensure bhk is an integer
 
     # Compute the average rent based on the input parameters
     average_rent = FILTER_IT_NOW(bhk, city, furnishing_status, bathroom)

@@ -80,7 +80,7 @@ def load_encrypted_database(filename):
 
 
 def encrypt_input(value):
-    plaintext = cryptoContext.MakePackedPlaintext([value])
+    plaintext = cryptoContext.MakePackedPlaintext([int(value)])  # Convert value to int if not already
     ciphertext = cryptoContext.Encrypt(keypair.publicKey, plaintext)
     print(f"Input {value} encrypted.")
     return ciphertext
@@ -106,7 +106,7 @@ def find_match(negated_ciphertext, database):
         if value == 0:
             original_pt = cryptoContext.Decrypt(keypair.secretKey, ct)
             original_pt = str(original_pt).split()[1]
-            return original_pt  # Returning the original plaintext of the matching ciphertext
+            return int(original_pt)  # Returning the original plaintext of the matching ciphertext
     return "No match found"
 
 
