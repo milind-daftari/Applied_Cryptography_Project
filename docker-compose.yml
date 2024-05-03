@@ -44,7 +44,7 @@ services:
       - REACT_APP_BACKEND_URL=http://127.0.0.1:5000
     networks:
       - app-network
-
+      
 networks:
   app-network:
     driver: bridge
