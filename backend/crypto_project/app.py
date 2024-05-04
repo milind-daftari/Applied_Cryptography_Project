@@ -143,14 +143,15 @@ def upload_data_to_db(preprocessed_data):
             city = str(preprocessed_data.iloc[i]['City'])
             bhk = str(preprocessed_data.iloc[i]['BHK'])
             f_status = str(preprocessed_data.iloc[i]['Furnishing Status'])
-            cur.execute("INSERT INTO encrypted_data (rent, city, furnished_status, bhk) VALUES (%s, %s, %s, %s)", (encrypted_bytes, city, f_status, bhk))
+            broom = str(preprocessed_data.iloc[i]['Bathroom'])
+            cur.execute("INSERT INTO encrypted_data (rent, city, furnished_status, bhk, bathroom) VALUES (%s, %s, %s, %s, %s)", (encrypted_bytes, city, f_status, bhk, broom))
     conn.commit()
     cur.close()
     conn.close()
     remove_all_files(encrypted_files_directory)
     print("Done Upload to DB")
 
-def retrieve_and_save_data(city, bhk):
+def retrieve_and_save_data(city, bhk, f_status, broom):
     # Assuming a directory for this purpose
     retrieve_file_path = "Temp_decrypt"
     if not os.path.exists(retrieve_file_path):
@@ -166,7 +167,7 @@ def retrieve_and_save_data(city, bhk):
         )
         cur = conn.cursor()
 
-        cur.execute("SELECT rent FROM encrypted_data WHERE city = %s AND bhk = %s", (city, bhk,))
+        cur.execute("SELECT rent FROM encrypted_data WHERE city = %s AND bhk = %s AND furnished_status = %s AND bathroom = %s", (city, bhk, f_status, broom))
         rows = cur.fetchall()
 
         if not rows:
@@ -297,7 +298,20 @@ def filter_options():
     city = request.args.get('city')
     furnishing_status = request.args.get('furnishingStatus')
     bathroom = request.args.get('bathroom')
-    result = encrypted_search(bhk)
+
+    # Assuming a directory for this purpose
+    res = retrieve_and_save_data(str(city), str(bhk), str(furnishing_status), str(bathroom))
+    print("Retrieved Data")
+    if not res:
+        print("No Data Exists for the combination")
+    # Compute the homomorphic average
+    homomorphic_sum, count = compute_homomorphic_average()
+    # Decrypt homomorphic average
+    decrypted_homomorphic_average = decrypt_homomorphic_average(homomorphic_sum, count)
+    print("Decrypted Homomorphic Average:", decrypted_homomorphic_average * 1000)
+
+    result = int(decrypted_homomorphic_average * 1000)
+
     if bhk is not None:
         return jsonify(averageRent=result)
     else:
@@ -310,7 +324,7 @@ if __name__ == '__main__':
 
     ###PKV
     data_path = "House_Rent_Dataset.csv"
-    columns_select = ["Rent", "City", "BHK", "Furnishing Status"]
+    columns_select = ["Rent", "City", "BHK", "Furnishing Status", "Bathroom"]
     preprocessed_data = preprocess_data(data_path, columns_select)
     print("Done Preporcessing")
     
@@ -322,7 +336,7 @@ if __name__ == '__main__':
 
     if Testing:
         # Assuming a directory for this purpose
-        res = retrieve_and_save_data("Kolkata", "2")
+        res = retrieve_and_save_data("Kolkata", "2", "Furnished", "1")
         print("Retrieved Data")
         if not res:
             print("No Data Exists for the combination")
@@ -333,10 +347,12 @@ if __name__ == '__main__':
         print("Decrypted Homomorphic Average:", decrypted_homomorphic_average * 1000)
                         
         # Group the DataFrame by 'city' and 'BHK' and calculate the average rent
-        average_rent = preprocessed_data.groupby(['City', 'BHK'])['Rent'].mean()
+        average_rent = preprocessed_data.groupby(["City", "BHK", "Furnishing Status", "Bathroom"])['Rent'].mean()
 
         # Access the average rent directly (assuming a single value is returned)
-        average_rent_specific = average_rent.loc[("Kolkata", 2)]
+        average_rent_specific = average_rent.loc[("Kolkata", 2, "Furnished", 1)]
+        # Print the result without using 'values'
+        print(f"Average rent for city '{city}' and BHK {bhk}:", average_rent_specific)
 
     ###PKV
 
