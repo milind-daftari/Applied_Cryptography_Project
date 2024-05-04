@@ -23,8 +23,6 @@ services:
     build: ./backend/crypto_project
     ports:
       - "5000:5000"
-    volumes:
-      - ./backend/crypto_project:/app
     environment:
       - FLASK_ENV=development
       - FLASK_APP=app.py
