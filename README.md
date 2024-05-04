@@ -22,7 +22,7 @@ You need to have the following installed on your system:
 
 ### Setting Up the Environment
 
-#### Docker Setup
+#### Docker Setup (Preferred Option)
 
 1. Clone the repository or download the source code.
 2. From the project root directory, build and run the Docker containers:
@@ -31,7 +31,7 @@ You need to have the following installed on your system:
    ```
    This command will set up both the front end and the back end services.
 
-#### Back End Setup
+#### Back End Setup (Not required if using Docker Setup)
 
 1. Navigate to the Flask project directory:
    ```bash
@@ -47,7 +47,7 @@ You need to have the following installed on your system:
    pip install flask flask-cors
    ```
 
-#### Front End Setup
+#### Front End Setup (Not required if using Docker Setup)
 
 1. Navigate to the React project directory (optional if running inside Docker):
    ```bash
@@ -63,7 +63,6 @@ You need to have the following installed on your system:
 The application should be accessible via:
 
 - **Front End**: `http://localhost:3000`
-- **Back End**: `http://localhost:5000`
 
 ## Usage
 
@@ -71,6 +70,3 @@ The application should be accessible via:
 - **Choose an Option**: After selecting a category, the second dropdown will populate with options. Select one that matches your criteria.
 - **Fetch Data**: Click the "Fetch Data" button to retrieve the rental data based on the selected filter and option. The results will be displayed in a table below the filters.
 
-## Contributing
-
-Feel free to fork the repository, make changes, and submit pull requests. Any contributions you make are **greatly appreciated**.
